@@ -26,6 +26,7 @@ void sampleAndHold(const uchar input[], int xSize, int ySize, uchar output[], in
 		for(i = 0; i < newXSize; i++) {
 			p = (j-1)/fy + 1;
 			q = (i-1)/fx + 1;
+
 			yBuffO[j * newXSize + i] = yBuff[p * xSize + q];
 		}
 	}
@@ -33,6 +34,7 @@ void sampleAndHold(const uchar input[], int xSize, int ySize, uchar output[], in
 		for(i = 0; i < newXSize; i+=2) {
 			p = (j-1)/fy + 1;
 			q = (i-1)/fx + 1;
+
 			uBuffO[(j/2) * newXSize/2 + i/2] = uBuff[(p/2) * (xSize/2) + q/2];
 			vBuffO[(j/2) * newXSize/2 + i/2] = vBuff[(p/2) * (xSize/2) + q/2];
 		}
@@ -91,7 +93,6 @@ void bilinearInterpolate(const uchar input[], int xSize, int ySize, uchar output
 												 (1 - a) * b * uBuff[((m/2) + 1) * (xSize/2) + n/2] +
 												 a * (1 - b) * uBuff[(m/2) * (xSize/2) + n/2 + 1] +
 												 a * b * uBuff[((m/2) + 1) * (xSize/2) + n/2 + 1];
-
 			vBuffO[(j/2) * (newXSize/2) + i/2] = (1 - a) * (1 - b) * vBuff[(m/2) * (xSize/2) + n/2] +
 												 (1 - a) * b * vBuff[((m/2) + 1) * (xSize/2) + n/2] +
 												 a * (1 - b) * vBuff[(m/2) * (xSize/2) + n/2 + 1] +
@@ -126,8 +127,8 @@ void imageRotate(const uchar input[], int xSize, int ySize, uchar output[], int 
 	RGBtoYUV420(input, xSize, ySize, yBuff, uBuff, vBuff);
 	for(j = 0; j < ySize; j++) {
 		for(i = 0; i < xSize; i++) {
-			indexX = floor(i * cos(angle) - j * sin(angle) - m * cos(angle) + n * sin(angle) + m + 0.5);
-			indexY = floor(j * cos(angle) + i * sin(angle) - m * sin(angle) - n * cos(angle) + n + 0.5);
+			indexX = round(i * cos(angle) - j * sin(angle) - m * cos(angle) + n * sin(angle) + m);
+			indexY = round(j * cos(angle) + i * sin(angle) - m * sin(angle) - n * cos(angle) + n);
 
 			if(indexX < 0 || indexX >= xSize || indexY < 0 || indexY >= ySize) {
 				yBuffO[j * xSize + i] = 0;
@@ -138,8 +139,8 @@ void imageRotate(const uchar input[], int xSize, int ySize, uchar output[], int 
 	}
 	for(j = 0; j < ySize; j+=2) {
 		for(i = 0; i < xSize; i+=2) {
-			indexX = floor(i * cos(angle) - j * sin(angle) - m * cos(angle) + n * sin(angle) + m + 0.5);
-			indexY = floor(j * cos(angle) + i * sin(angle) - m * sin(angle) - n * cos(angle) + n + 0.5);
+			indexX = round(i * cos(angle) - j * sin(angle) - m * cos(angle) + n * sin(angle) + m);
+			indexY = round(j * cos(angle) + i * sin(angle) - m * sin(angle) - n * cos(angle) + n);
 
 			if(indexX < 0 || indexX >= xSize || indexY < 0 || indexY >= ySize) {
 				uBuffO[(j/2) * xSize/2 + i/2] = 0;
@@ -185,10 +186,10 @@ void imageRotateBilinear(const uchar input[], int xSize, int ySize, uchar output
 			a = indexX - floor(indexX);
 			b = indexY - floor(indexY);
 
-			indexXprim = floor(indexX + 0.5);
-			indexYprim = floor(indexY + 0.5);
+			indexXprim = indexX;
+			indexYprim = indexY;
 
-            if (indexX < 0 || indexX >= xSize || indexY < 0 || indexY >= ySize) {
+            if (round(indexX) < 0 || round(indexX) >= xSize || round(indexY) < 0 || round(indexY) >= ySize) {
                 yBuffO[j * xSize + i] = 0;
             } else {
 				yBuffO[j * xSize + i] = (1 - a) * (1 - b) *  yBuff[indexYprim * xSize + indexXprim] +
@@ -206,18 +207,17 @@ void imageRotateBilinear(const uchar input[], int xSize, int ySize, uchar output
 			a = indexX - floor(indexX);
 			b = indexY - floor(indexY);
 
-			indexXprim = floor(indexX + 0.5);
-			indexYprim = floor(indexY + 0.5);
+			indexXprim = indexX;
+			indexYprim = indexY;
 
-            if (indexX < 0 || indexX >= xSize || indexY < 0 || indexY >= ySize) {
-                uBuffO[(j / 2) * xSize / 2 + i / 2] = 0;
-                vBuffO[(j / 2) * xSize / 2 + i / 2] = 0;
+            if (round(indexX) < 0 || round(indexX) >= xSize || round(indexY) < 0 || round(indexY) >= ySize) {
+                uBuffO[(j/2) * xSize / 2 + i/2] = 0;
+                vBuffO[(j/2) * xSize / 2 + i/2] = 0;
             } else {
 				uBuffO[(j/2) * (xSize/2) + i/2] = (1 - a) * (1 - b) * uBuff[(indexYprim/2) * (xSize/2) + indexXprim/2] +
 												 (1 - a) * b * uBuff[((indexYprim/2) + 1) * (xSize/2) + indexXprim/2] +
 												 a * (1 - b) * uBuff[(indexYprim/2) * (xSize/2) + indexXprim/2 + 1] +
 												 a * b * uBuff[((indexYprim/2) + 1) * (xSize/2) + indexXprim/2 + 1];
-
 				vBuffO[(j/2) * (xSize/2) + i/2] = (1 - a) * (1 - b) * vBuff[(indexYprim/2) * (xSize/2) + indexXprim/2] +
 												 (1 - a) * b * vBuff[((indexYprim/2) + 1) * (xSize/2) + indexXprim/2] +
 												 a * (1 - b) * vBuff[(indexYprim/2) * (xSize/2) + indexXprim/2 + 1] +
@@ -234,4 +234,20 @@ void imageRotateBilinear(const uchar input[], int xSize, int ySize, uchar output
 	delete[] yBuffO;
 	delete[] uBuffO;
 	delete[] vBuffO;
+}
+
+int round(double number) {
+	if(number >= 0) {
+		if(number - (int)number < 0.5) {
+			return (int)floor(number);
+		} else {
+			return (int)ceil(number);
+		}
+	} else {
+		if(-number + (int)number < 0.5) {
+			return (int)ceil(number);
+		} else {
+			return (int)floor(number);
+		}
+	}
 }

@@ -14,4 +14,6 @@ void imageRotate(const uchar input[], int xSize, int ySize, uchar output[], int 
 
 void imageRotateBilinear(const uchar input[], int xSize, int ySize, uchar output[], int m, int n, double angle);
 
+int round(double number);
+
 #endif // IMAGEINTERPOLATION_H_
