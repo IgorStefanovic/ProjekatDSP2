@@ -12,4 +12,6 @@ void imageProcessingFun(
 		const QImage* const inImgs,
 		const QVector<double>& params);
 
+int calculateIndex(int index);
+
 #endif // IMAGEPROCESSING_H_

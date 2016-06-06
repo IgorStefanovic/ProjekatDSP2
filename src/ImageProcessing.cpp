@@ -8,7 +8,7 @@ void imageProcessingFun(const QString& progName, QImage* const outImgs, const QI
 {
 	int X_SIZE = inImgs->width();
 	int Y_SIZE = inImgs->height();
-	int newXSize, newYSize, help;
+	int newXSize, newYSize;
 	/* NOTE: Calculate output image resolution and construct output image object */
 
 	if(progName == "Sample and hold") 
@@ -18,8 +18,8 @@ void imageProcessingFun(const QString& progName, QImage* const outImgs, const QI
 		/* Horizontal scale factor is params[1] */
 
 		/* TO DO: Calculate output image resolution and construct output image object */
-		newXSize = (int)(params[0] + 0.5) * X_SIZE;
-		newYSize = (int)(params[1] + 0.5) * Y_SIZE;
+		newXSize = calculateIndex(params[1] * X_SIZE);
+		newYSize = calculateIndex(params[0] * Y_SIZE);
 
 		*outImgs = *(new QImage(newXSize, newYSize, inImgs->format()));
 
@@ -33,8 +33,8 @@ void imageProcessingFun(const QString& progName, QImage* const outImgs, const QI
 		/* Horizontal scale factor is params[1] */
 
 		/* TO DO: Calculate output image resolution and construct output image object */
-		newXSize = (int)(params[0] + 0.5) * X_SIZE;
-		newYSize = (int)(params[1] + 0.5) * Y_SIZE;
+		newXSize = calculateIndex(params[1] * X_SIZE);
+		newYSize = calculateIndex(params[0] * Y_SIZE);
 
 		*outImgs = *(new QImage(newXSize, newYSize, inImgs->format()));
 
@@ -63,8 +63,15 @@ void imageProcessingFun(const QString& progName, QImage* const outImgs, const QI
          *outImgs = *(new QImage(X_SIZE, Y_SIZE, inImgs->format()));
         
 		/* TO DO: Perform image rotation with bilinear interpolation */
-		 imageRotateBilinear(inImgs->bits(), X_SIZE, Y_SIZE, outImgs->bits(), X_SIZE / 2, Y_SIZE / 2, params[0]);
+		 imageRotateBilinear(inImgs->bits(), X_SIZE, Y_SIZE, outImgs->bits(), X_SIZE/2, Y_SIZE/2, params[0]);
 	}
 
+}
+
+int calculateIndex(int index) {
+	while(index % 4 != 0) {
+		index++;
+	}
+	return index;
 }
 
