@@ -172,10 +172,10 @@ void imageRotate(const uchar input[], int xSize, int ySize, uchar output[], int 
 	}
 	for(j = 0; j < ySize/2; j++) {
 		for(i = 0; i < xSize/2; i++) {
-			indexX = round(i * cos(angle) - j * sin(angle) - m * cos(angle) + n * sin(angle) + m);
-			indexY = round(j * cos(angle) + i * sin(angle) - m * sin(angle) - n * cos(angle) + n);
+			indexX = round(i * cos(angle) - j * sin(angle) - m/2 * cos(angle) + n/2 * sin(angle) + m/2);
+			indexY = round(j * cos(angle) + i * sin(angle) - m/2 * sin(angle) - n/2 * cos(angle) + n/2);
 
-			if(indexX < 0 || indexX >= xSize || indexY < 0 || indexY >= ySize) {
+			if(indexX < 0 || indexX >= xSize/2 || indexY < 0 || indexY >= ySize/2) {
 				uBuffO[j * xSize/2 + i] = 0;
 				vBuffO[j * xSize/2 + i] = 0;
 			} else {
@@ -234,8 +234,8 @@ void imageRotateBilinear(const uchar input[], int xSize, int ySize, uchar output
     }
 	for (j = 0; j < ySize/2; j++) {
         for (i = 0; i < xSize/2; i++) {
-            indexX = i * cos(angle) - j * sin(angle) - m * cos(angle) + n * sin(angle) + m;
-			indexY = j * cos(angle) + i * sin(angle) - m * sin(angle) - n * cos(angle) + n;
+            indexX = i * cos(angle) - j * sin(angle) - m/2 * cos(angle) + n/2 * sin(angle) + m/2;
+			indexY = j * cos(angle) + i * sin(angle) - m/2 * sin(angle) - n/2 * cos(angle) + n/2;
 
 			a = indexX - floor(indexX);
 			b = indexY - floor(indexY);
@@ -243,7 +243,7 @@ void imageRotateBilinear(const uchar input[], int xSize, int ySize, uchar output
 			indexXprim = indexX;
 			indexYprim = indexY;
 
-            if (round(indexX) < 0 || round(indexX) >= xSize || round(indexY) < 0 || round(indexY) >= ySize) {
+            if (round(indexX) < 0 || round(indexX) >= xSize/2 || round(indexY) < 0 || round(indexY) >= ySize/2) {
                 uBuffO[j * xSize / 2 + i] = 0;
                 vBuffO[j * xSize / 2 + i] = 0;
             } else {
