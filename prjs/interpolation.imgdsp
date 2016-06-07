@@ -25,13 +25,14 @@
 			</params>
         </program>
     </programs>
-    <in_imgs>
+    <in_imgs>	
 	    <in_img file_name="lena.bmp"/>
 		<in_img file_name="baboon.bmp"/>
         <in_img file_name="green_cat.jpg"/>
         <in_img file_name="image1.bmp"/>
 		<in_img file_name="clock.bmp"/>
-		<in_img file_name="tennis.bmp"/>	
+		<in_img file_name="tennis.bmp"/>
+		<in_img file_name="home.png"/>
     </in_imgs>
     <out_imgs>
         <out_img file_name="processed_img.jpg"/>

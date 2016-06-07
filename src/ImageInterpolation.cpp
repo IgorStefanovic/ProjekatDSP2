@@ -18,25 +18,39 @@ void sampleAndHold(const uchar input[], int xSize, int ySize, uchar output[], in
 	char* uBuffO = new char[newXSize * newYSize / 4];
 	char* vBuffO = new char[newXSize * newYSize / 4];
 
-	fx = (double)newXSize / xSize;
-	fy = (double)newYSize / ySize;
+	fx = (double)newXSize/xSize;
+	fy = (double)newYSize/ySize;
 
 	RGBtoYUV420(input, xSize, ySize, yBuff, uBuff, vBuff);
 	for(j = 0; j < newYSize; j++) {
 		for(i = 0; i < newXSize; i++) {
-			p = (j-1)/fy + 1;
-			q = (i-1)/fx + 1;
+			p = j/fy;
+			q = i/fx;
+
+			if(p >= ySize) {
+				p = ySize - 1;
+			}
+			if(q >= xSize) {
+				q = xSize - 1;
+			}
 
 			yBuffO[j * newXSize + i] = yBuff[p * xSize + q];
 		}
 	}
-	for(j = 0; j < newYSize; j+=2) {
-		for(i = 0; i < newXSize; i+=2) {
-			p = (j-1)/fy + 1;
-			q = (i-1)/fx + 1;
+	for(j = 0; j < newYSize/2; j++) {
+		for(i = 0; i < newXSize/2; i++) {
+			p = j/fy;
+			q = i/fx;
 
-			uBuffO[(j/2) * newXSize/2 + i/2] = uBuff[(p/2) * (xSize/2) + q/2];
-			vBuffO[(j/2) * newXSize/2 + i/2] = vBuff[(p/2) * (xSize/2) + q/2];
+			if(p >= ySize/2) {
+				p = ySize/2 - 1;
+			}
+			if(q >= xSize/2) {
+				q = xSize/2 - 1;
+			}
+
+			uBuffO[j * newXSize/2 + i] = uBuff[p * (xSize/2) + q];
+			vBuffO[j * newXSize/2 + i] = vBuff[p * (xSize/2) + q];
 		}
 	}
 	YUV420toRGB(yBuffO, uBuffO, vBuffO, newXSize, newYSize, output);
@@ -52,7 +66,7 @@ void sampleAndHold(const uchar input[], int xSize, int ySize, uchar output[], in
 
 void bilinearInterpolate(const uchar input[], int xSize, int ySize, uchar output[], int newXSize, int newYSize)
 {
-	int i, j, m, n;
+	int i, j, m, n, newM, newN;
 	double a ,b, fx, fy;
 
 	uchar* yBuff = new uchar[xSize * ySize];
@@ -63,8 +77,8 @@ void bilinearInterpolate(const uchar input[], int xSize, int ySize, uchar output
 	char* uBuffO = new char[newXSize * newYSize / 4];
 	char* vBuffO = new char[newXSize * newYSize / 4];
 	
-	fx = (double)newXSize / xSize;
-	fy = (double)newYSize / ySize;
+	fx = (double)newXSize/xSize;
+	fy = (double)newYSize/ySize;
 
 	RGBtoYUV420(input, xSize, ySize, yBuff, uBuff, vBuff);
 	for(j = 0; j < newYSize; j++) {
@@ -75,28 +89,47 @@ void bilinearInterpolate(const uchar input[], int xSize, int ySize, uchar output
 			n = i / fx;
 			m = j / fy;
 
+			newM = m + 1;
+			newN = n + 1;
+			if(newM >= ySize) {
+				newM = ySize - 1;
+			}
+			if(newN >= xSize) {
+				newN = xSize - 1;
+			}
+
 			yBuffO[j * newXSize + i] = (1 - a) * (1 - b) * yBuff[m * xSize + n] + 
-									   (1 - a) * b * yBuff[(m + 1) * xSize + n] +
-									   a * (1 - b) * yBuff[m * xSize + (n + 1)] +
-									   a * b *	yBuff[(m + 1) * xSize + (n + 1)];
+									   (1 - a) * b * yBuff[newM * xSize + n] +
+									   a * (1 - b) * yBuff[m * xSize + newN] +
+									   a * b *	yBuff[newM * xSize + newN];
 		}
 	}
-	for(j = 0; j < newYSize; j+=2) {
-		for(i = 0; i < newXSize; i+=2) {
+	for(j = 0; j < newYSize/2; j++) {
+		for(i = 0; i < newXSize/2; i++) {
 			a = i / fy - floor(i / fy);
 			b = j / fx - floor(j / fx);
 
 			n = i / fx;
 			m = j / fy;
 
-			uBuffO[(j/2) * (newXSize/2) + i/2] = (1 - a) * (1 - b) * uBuff[(m/2) * (xSize/2) + n/2] +
-												 (1 - a) * b * uBuff[((m/2) + 1) * (xSize/2) + n/2] +
-												 a * (1 - b) * uBuff[(m/2) * (xSize/2) + n/2 + 1] +
-												 a * b * uBuff[((m/2) + 1) * (xSize/2) + n/2 + 1];
-			vBuffO[(j/2) * (newXSize/2) + i/2] = (1 - a) * (1 - b) * vBuff[(m/2) * (xSize/2) + n/2] +
-												 (1 - a) * b * vBuff[((m/2) + 1) * (xSize/2) + n/2] +
-												 a * (1 - b) * vBuff[(m/2) * (xSize/2) + n/2 + 1] +
-											     a * b * vBuff[((m/2) + 1) * (xSize/2) + n/2 + 1];
+			newM = m + 1;
+			newN = n + 1;
+			if(newM >= ySize/2) {
+				newM = ySize/2 - 1;
+			}
+			if(newN >= xSize/2) {
+				newN = xSize/2 - 1;
+			}
+
+			uBuffO[j * (newXSize/2) + i] = (1 - a) * (1 - b) * uBuff[m * (xSize/2) + n] +
+												 (1 - a) * b * uBuff[newM * (xSize/2) + n] +
+												 a * (1 - b) * uBuff[m * (xSize/2) + newN] +
+												 a * b * uBuff[newM * (xSize/2) + newN];
+
+			vBuffO[j * (newXSize/2) + i] = (1 - a) * (1 - b) * vBuff[m * (xSize/2) + n] +
+												 (1 - a) * b * vBuff[newM * (xSize/2) + n] +
+												 a * (1 - b) * vBuff[m * (xSize/2) + newN] +
+											     a * b * vBuff[newM * (xSize/2) + newN];
 		}
 	}
 	YUV420toRGB(yBuffO, uBuffO, vBuffO, newXSize, newYSize, output);
@@ -137,17 +170,17 @@ void imageRotate(const uchar input[], int xSize, int ySize, uchar output[], int 
 			}
 		}
 	}
-	for(j = 0; j < ySize; j+=2) {
-		for(i = 0; i < xSize; i+=2) {
+	for(j = 0; j < ySize/2; j++) {
+		for(i = 0; i < xSize/2; i++) {
 			indexX = round(i * cos(angle) - j * sin(angle) - m * cos(angle) + n * sin(angle) + m);
 			indexY = round(j * cos(angle) + i * sin(angle) - m * sin(angle) - n * cos(angle) + n);
 
 			if(indexX < 0 || indexX >= xSize || indexY < 0 || indexY >= ySize) {
-				uBuffO[(j/2) * xSize/2 + i/2] = 0;
-				vBuffO[(j/2) * xSize/2 + i/2] = 0;
+				uBuffO[j * xSize/2 + i] = 0;
+				vBuffO[j * xSize/2 + i] = 0;
 			} else {
-				uBuffO[(j/2)* xSize/2 + i/2] = uBuff[(indexY/2) * xSize/2 + indexX/2];
-				vBuffO[(j/2) * xSize/2 + i/2] = vBuff[(indexY/2) * xSize/2 + indexX/2];
+				uBuffO[j * xSize/2 + i] = uBuff[indexY * xSize/2 + indexX];
+				vBuffO[j * xSize/2 + i] = vBuff[indexY * xSize/2 + indexX];
 			}
 		}
 	}
@@ -199,8 +232,8 @@ void imageRotateBilinear(const uchar input[], int xSize, int ySize, uchar output
             }
         }
     }
-	for (j = 0; j < ySize; j+=2) {
-        for (i = 0; i < xSize; i+=2) {
+	for (j = 0; j < ySize/2; j++) {
+        for (i = 0; i < xSize/2; i++) {
             indexX = i * cos(angle) - j * sin(angle) - m * cos(angle) + n * sin(angle) + m;
 			indexY = j * cos(angle) + i * sin(angle) - m * sin(angle) - n * cos(angle) + n;
 
@@ -211,17 +244,17 @@ void imageRotateBilinear(const uchar input[], int xSize, int ySize, uchar output
 			indexYprim = indexY;
 
             if (round(indexX) < 0 || round(indexX) >= xSize || round(indexY) < 0 || round(indexY) >= ySize) {
-                uBuffO[(j/2) * xSize / 2 + i/2] = 0;
-                vBuffO[(j/2) * xSize / 2 + i/2] = 0;
+                uBuffO[j * xSize / 2 + i] = 0;
+                vBuffO[j * xSize / 2 + i] = 0;
             } else {
-				uBuffO[(j/2) * (xSize/2) + i/2] = (1 - a) * (1 - b) * uBuff[(indexYprim/2) * (xSize/2) + indexXprim/2] +
-												 (1 - a) * b * uBuff[((indexYprim/2) + 1) * (xSize/2) + indexXprim/2] +
-												 a * (1 - b) * uBuff[(indexYprim/2) * (xSize/2) + indexXprim/2 + 1] +
-												 a * b * uBuff[((indexYprim/2) + 1) * (xSize/2) + indexXprim/2 + 1];
-				vBuffO[(j/2) * (xSize/2) + i/2] = (1 - a) * (1 - b) * vBuff[(indexYprim/2) * (xSize/2) + indexXprim/2] +
-												 (1 - a) * b * vBuff[((indexYprim/2) + 1) * (xSize/2) + indexXprim/2] +
-												 a * (1 - b) * vBuff[(indexYprim/2) * (xSize/2) + indexXprim/2 + 1] +
-											     a * b * vBuff[((indexYprim/2) + 1) * (xSize/2) + indexXprim/2 + 1];
+				uBuffO[j * (xSize/2) + i] = (1 - a) * (1 - b) * uBuff[indexYprim * (xSize/2) + indexXprim] +
+												 (1 - a) * b * uBuff[(indexYprim + 1) * (xSize/2) + indexXprim] +
+												 a * (1 - b) * uBuff[indexYprim * (xSize/2) + indexXprim + 1] +
+												 a * b * uBuff[(indexYprim + 1) * (xSize/2) + indexXprim + 1];
+				vBuffO[j * (xSize/2) + i] = (1 - a) * (1 - b) * vBuff[indexYprim * (xSize/2) + indexXprim] +
+												 (1 - a) * b * vBuff[(indexYprim + 1) * (xSize/2) + indexXprim] +
+												 a * (1 - b) * vBuff[indexYprim * (xSize/2) + indexXprim + 1] +
+											     a * b * vBuff[(indexYprim + 1) * (xSize/2) + indexXprim + 1];
             }
         }
     }
