@@ -30,9 +30,11 @@
 		<in_img file_name="baboon.bmp"/>
         <in_img file_name="green_cat.jpg"/>
         <in_img file_name="image1.bmp"/>
+        <in_img file_name="tennis.bmp"/>
 		<in_img file_name="clock.bmp"/>
-		<in_img file_name="tennis.bmp"/>
-		<in_img file_name="home.png"/>
+        <in_img file_name="luffy.png"/>
+        <in_img file_name="aang.png"/>
+        <in_img file_name="naruto.png"/>
     </in_imgs>
     <out_imgs>
         <out_img file_name="processed_img.jpg"/>
